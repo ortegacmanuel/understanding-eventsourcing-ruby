@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require_relative '../events/item_added'
+require_relative '../events/cart_created'
 
 AddItemCommand = Data.define(
   :cart_id,
@@ -13,15 +14,20 @@ AddItemCommand = Data.define(
 module AddItemCommandHandler
   State = Data.define(:item_count)
 
-  class CartCannotHaveMoreThan3Items < StandardError; end
+  class TooManyItemsInCart < StandardError; end
 
   def self.call(events, command)
     state = build_state(events)
     if state.item_count >= 3
-      raise CartCannotHaveMoreThan3Items
+      raise TooManyItemsInCart
     end
     
     [
+      CartCreated.new(
+        data: {
+          cart_id: command.cart_id,
+        }
+      ),
       ItemAdded.new(
         data: {
           cart_id: command.cart_id,
@@ -91,7 +97,7 @@ class AddItem < Sinatra::Base
 
       status 200
       stored.to_json
-  rescue AddItemCommandHandler::CartCannotHaveMoreThan3Items
+  rescue AddItemCommandHandler::TooManyItemsInCart
     status 400
     { error: "Cart cannot have more than 3 items" }.to_json
   end
