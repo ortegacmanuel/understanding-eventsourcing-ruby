@@ -9,6 +9,7 @@ require_relative 'slices/add_item'
 require_relative 'slices/cart_items'
 require_relative 'slices/remove_item/remove_item'
 require_relative 'slices/clear_cart'
+require_relative 'slices/change_inventory'
 
 class App < Sinatra::Base
   event_store = Kroniko::EventStore.new
@@ -24,4 +25,7 @@ class App < Sinatra::Base
 
   ClearCart.set :event_store, event_store
   use ClearCart
+
+  ChangeInventory.set :event_store, event_store
+  use ChangeInventory
 end
