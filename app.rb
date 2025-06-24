@@ -8,6 +8,7 @@ require "sinatra/reloader" if development?
 require_relative 'slices/add_item'
 require_relative 'slices/cart_items'
 require_relative 'slices/remove_item/remove_item'
+require_relative 'slices/clear_cart'
 
 class App < Sinatra::Base
   event_store = Kroniko::EventStore.new
@@ -20,4 +21,7 @@ class App < Sinatra::Base
 
   RemoveItem.set :event_store, event_store
   use RemoveItem
+
+  ClearCart.set :event_store, event_store
+  use ClearCart
 end

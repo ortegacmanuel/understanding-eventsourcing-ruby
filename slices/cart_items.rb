@@ -52,6 +52,9 @@ class CartItemsReadModel
       when "ItemRemoved"
         self.data.delete_if { |item| item.item_id == event.data["item_id"] }
         self.total_price = self.data.sum {|item| item.price }
+      when "CartCleared"
+        self.data = []
+        self.total_price = 0.0
       end
     end
     self
