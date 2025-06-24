@@ -41,4 +41,36 @@ class CartItemsTest < Minitest::Test
         }
       )
   end
+
+  def test_cart_items_with_removed_item
+    with_read_model(CartItemsReadModel).
+      given([
+        CartCreated.new(
+          data: { "cart_id" => "cart123" }
+        ),
+        ItemAdded.new(
+          data: {
+            "cart_id" => "cart123",
+            "item_id" => "item001",
+            "description" => "Test Item",
+            "image" => "http://example.com/image.png",
+            "product_id" => "prod001",
+            "price" => 10.00
+          }
+        ),
+        ItemRemoved.new(
+          data: {
+            "cart_id" => "cart123",
+            "item_id" => "item001"
+          }
+        )
+      ]).
+      then(
+        {
+          "cart_id": "cart123",
+          "total_price": 0.0,
+          "data": []
+        }
+      )
+  end
 end

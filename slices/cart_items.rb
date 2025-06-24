@@ -49,6 +49,9 @@ class CartItemsReadModel
         )
         self.data << cart_item
         self.total_price += event.data["price"].to_f
+      when "ItemRemoved"
+        self.data.delete_if { |item| item.item_id == event.data["item_id"] }
+        self.total_price = self.data.sum {|item| item.price }
       end
     end
     self
