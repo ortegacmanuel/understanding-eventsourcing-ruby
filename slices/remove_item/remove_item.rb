@@ -31,9 +31,9 @@ class RemoveItem < Sinatra::Base
       ))
       settings.event_store.write(events: new_events)
   
-      status 200s
+      status 200
       { message: "Item removed" }.to_json
-    rescue RemoveItemCommandHandler::ItemNotFound
+    rescue RemoveItemCommandHandler::ItemNotInCart
       status 404
       { error: "Item not found in cart" }.to_json
     rescue JSON::ParserError
