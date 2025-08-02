@@ -14,3 +14,5 @@ gem 'rackup'
 gem 'puma'
 
 gem "minitest"
+
+gem 'sequel', '>= 5.79'
