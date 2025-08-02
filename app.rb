@@ -11,6 +11,7 @@ require_relative 'slices/cart_items/cart_items'
 require_relative 'slices/remove_item/remove_item'
 require_relative 'slices/clear_cart/clear_cart'
 require_relative 'slices/change_inventory/change_inventory'
+require_relative 'slices/change_price/change_price'
 
 require_relative 'slices/inventories/listener'
 require_relative 'slices/inventories/projector'
@@ -41,4 +42,7 @@ class WebApp < Sinatra::Base
 
   Inventories::API.set :conn_str, ENV.fetch('DATABASE_URL')
   use Inventories::API
+
+  ChangePrice.set :event_store, settings.event_store
+  use ChangePrice
 end
