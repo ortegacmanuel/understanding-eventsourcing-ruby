@@ -16,7 +16,7 @@ module CommandHandlerHelper
 
   def then(expected_events)
     actual_events = @command_handler.call(@events, @command)
-    to_compare = ->(ev) { { type: ev.type, data: ev.data } }
+    to_compare = ->(ev) { { type: ev.event_type, payload: ev.payload } }
     assert_equal expected_events.map(&to_compare),actual_events.map(&to_compare)
   end
 

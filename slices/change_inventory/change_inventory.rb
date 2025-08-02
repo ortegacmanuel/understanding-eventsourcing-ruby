@@ -1,11 +1,23 @@
 require 'sinatra/base'
-require_relative '../events/inventory_changed'
+
+class InventoryChanged < EventStoreRuby::Event
+  def initialize(product_id:, quantity:)
+    payload = {
+      product_id: product_id,
+      quantity: quantity
+    }
+    super(event_type: 'InventoryChanged', payload: payload)
+  end
+
+  def product_id; payload[:product_id]; end
+  def quantity; payload[:quantity]; end
+end
 
 ChangeInventoryCommand = Data.define(:product_id, :quantity)
 
 module ChangeInventoryCommandHandler
   def self.call(events, command)
-    [InventoryChanged.new(data: { product_id: command.product_id, quantity: command.quantity })]
+    [InventoryChanged.new(product_id: command.product_id, quantity: command.quantity)]
   end
 end
 
@@ -21,7 +33,8 @@ class ChangeInventory < Sinatra::Base
       quantity: data['quantity']
     )
     new_events = ChangeInventoryCommandHandler.call([], command)
-    stored = settings.event_store.write(events: new_events)
+    settings.event_store.append(new_events)
+    
     status 200
     { message: 'OK' }.to_json
   end

@@ -7,7 +7,8 @@ gem 'json'
 
 gem 'debug'
 
-gem 'kroniko', git: 'https://github.com/ortegacmanuel/kroniko.git'
+gem 'pg', '>= 1.4'
+gem 'eventstore_ruby', path: '/home/manuel/kodo/eventstore-ruby'
 
 gem 'rackup'
 gem 'puma'

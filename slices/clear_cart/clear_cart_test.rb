@@ -1,10 +1,8 @@
 require 'minitest/autorun'
-require 'kroniko'
+require 'eventstore_ruby'
 
-require_relative '../slices/clear_cart'
-require_relative 'command_handler_helper'
-require_relative '../events/cart_created'
-require_relative '../events/cart_cleared'
+require_relative 'clear_cart'
+require_relative '../../lib/command_handler_helper'
 
 class ClearCartTest < Minitest::Test
   include CommandHandlerHelper
@@ -12,13 +10,13 @@ class ClearCartTest < Minitest::Test
   def test_clear_cart_happy_path
     with_command_handler(ClearCartCommandHandler).
       given([
-        CartCreated.new(data: { cart_id: 'cart123' })
+        EventStoreRuby::Event.new(event_type: "CartCreated", payload: { cart_id: 'cart123' })
       ]).
       when(
         ClearCartCommand.new(cart_id: 'cart123')
       ).
       then([
-        CartCleared.new(data: { cart_id: 'cart123' })
+        EventStoreRuby::Event.new(event_type: "CartCleared", payload: { cart_id: 'cart123' })
       ])
   end
 

@@ -1,14 +1,8 @@
 require 'minitest/autorun'
-require 'kroniko'
-require_relative 'command_handler_helper'
+require 'eventstore_ruby'
 
-require_relative '../events/cart_created'
-require_relative '../events/item_added'
-require_relative '../events/item_removed'
-
-require_relative '../slices/remove_item/remove_item_command_handler'
-require_relative '../slices/remove_item/remove_item_command'
-
+require_relative 'remove_item'
+require_relative '../../lib/command_handler_helper'
 
 class RemoveItemTest < Minitest::Test
   include CommandHandlerHelper
@@ -16,8 +10,8 @@ class RemoveItemTest < Minitest::Test
   def test_remove_item_happy_path
     with_command_handler(RemoveItemCommandHandler).
       given([
-        CartCreated.new(data: { cart_id: "cart123" }),
-        ItemAdded.new(data: {
+        EventStoreRuby::Event.new(event_type: "CartCreated", payload: { cart_id: "cart123" }),
+        EventStoreRuby::Event.new(event_type: "ItemAdded", payload: {
           cart_id: "cart123",
           item_id: "item001",
           description: "Test Item",
@@ -33,7 +27,7 @@ class RemoveItemTest < Minitest::Test
         )
       ).
       then([
-        ItemRemoved.new(data: {
+        EventStoreRuby::Event.new(event_type: "ItemRemoved", payload: {
           cart_id: "cart123",
           item_id: "item001"
         })
@@ -43,8 +37,8 @@ class RemoveItemTest < Minitest::Test
   def test_remove_item_already_removed_raises_error
     with_command_handler(RemoveItemCommandHandler).
       given([
-        CartCreated.new(data: { cart_id: "cart123" }),
-        ItemAdded.new(data: {
+        EventStoreRuby::Event.new(event_type: "CartCreated", payload: { cart_id: "cart123" }),
+        EventStoreRuby::Event.new(event_type: "ItemAdded", payload: {
           cart_id: "cart123",
           item_id: "item001",
           description: "Test Item",
@@ -52,7 +46,7 @@ class RemoveItemTest < Minitest::Test
           product_id: "prod001",
           price: "10.99"
         }),
-        ItemRemoved.new(data: {
+        EventStoreRuby::Event.new(event_type: "ItemRemoved", payload: {
           cart_id: "cart123",
           item_id: "item001"
         })

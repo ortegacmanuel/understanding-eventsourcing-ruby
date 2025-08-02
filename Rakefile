@@ -2,7 +2,7 @@ require 'rake/testtask'
 
 Rake::TestTask.new do |t|
   t.libs << "test"
-  t.pattern = 'test/**/*_test.rb'
+  t.pattern = 'slices/**/*_test.rb'
   t.verbose = false
 end
 
