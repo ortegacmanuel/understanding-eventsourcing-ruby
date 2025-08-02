@@ -7,3 +7,6 @@ Rake::TestTask.new do |t|
 end
 
 task default: :test
+
+# Auto-import rake tasks defined inside slice folders
+Dir.glob('slices/**/tasks*.rake').each { |task_file| import task_file }
