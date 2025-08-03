@@ -1,4 +1,4 @@
-require_relative 'handler'
+require_relative 'command_handler'
 require_relative 'commands'
 
 module ArchiveItem
@@ -13,8 +13,7 @@ module ArchiveItem
           cart_id: cart_product[:cart_id],
           product_id: cart_product[:product_id]
         )
-        result = Handler.execute(event_store, cmd)
-        puts result.inspect 
+        result = CommandHandler.execute(event_store, cmd) 
       end
     end    
   end
