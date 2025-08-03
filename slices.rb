@@ -10,7 +10,7 @@ module Slices
 
   # Developers can write: BOOT_ORDER = [Inventories, PaymentsSlice]
   # Any slice omitted from this list will be appended automatically.
-  BOOT_ORDER = [] unless const_defined?(:BOOT_ORDER)
+  BOOT_ORDER = [CartsWithProducts] unless const_defined?(:BOOT_ORDER)
 
   # ---------------------------------------------------------------------------
   # Public: Boot every slice.

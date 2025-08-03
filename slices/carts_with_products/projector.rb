@@ -39,6 +39,7 @@ module CartsWithProducts
         ds.insert_conflict(target: [:cart_id, :item_id], update: {product_id: Sequel[:excluded][:product_id]})
           .insert(cart_id: cart_id, product_id: product_id, item_id: item_id)
       when 'ItemRemoved', 'ItemArchived'
+        puts "Removing item #{item_id} from cart #{cart_id}"
         ds.where(cart_id: cart_id, item_id: item_id).delete
       when 'CartCleared'
         ds.where(cart_id: cart_id).delete
@@ -51,7 +52,7 @@ module CartsWithProducts
 
       filter = EventStoreRuby.create_filter(%w[ItemAdded ItemRemoved CartCleared ItemArchived])
       events = event_store.query(filter).events
-      events.each { |ev| process_event(conn, ev) }
+      events.each { |ev| process_event(conn_str, ev) }
     end
   end
 end

@@ -1,11 +1,11 @@
 require_relative '../../lib/slice'
 require_relative 'change_price'
 
-module ChangePriceSlice
+module ChangePrice
   extend Slice
 
   on_boot do |event_store:, app:, **_|
-    ChangePrice.set :event_store, event_store
-    app.use ChangePrice
+    ChangePrice::API.set :event_store, event_store
+    app.use ChangePrice::API
   end
 end 

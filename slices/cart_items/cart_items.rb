@@ -54,6 +54,11 @@ class CartItemsReadModel
           self.data.delete_at(idx)
         end
         self.total_price = self.data.sum {|item| item.price }
+      when "ItemArchived"
+        if idx = self.data.find_index { |item| item.item_id == event.payload[:item_id] }
+          self.data.delete_at(idx)
+        end
+        self.total_price = self.data.sum {|item| item.price }
       when "CartCleared"
         self.data = []
         self.total_price = 0.0
@@ -79,7 +84,7 @@ class CartItems < Sinatra::Base
 
   get '/:cart_id/items' do
     filter = EventStoreRuby.create_filter(
-      ['CartCreated', 'ItemAdded', 'ItemRemoved', 'CartCleared'], 
+      ['CartCreated', 'ItemAdded', 'ItemRemoved', 'CartCleared', 'ItemArchived'], 
       [{cart_id: params[:cart_id]}]
     )
     query_result = settings.event_store.query(filter)
