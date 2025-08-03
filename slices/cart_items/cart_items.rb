@@ -35,22 +35,29 @@ class CartItemsReadModel
 
   def apply_event(events)
     events.each do |event|
-      case event.type
+      case event.event_type
       when "CartCreated"
-        self.cart_id = event.data["cart_id"]
+        self.cart_id = event.payload[:cart_id]
       when "ItemAdded"
         cart_item = CartItem.new(
-          item_id: event.data["item_id"],
-          cart_id: event.data["cart_id"],
-          description: event.data["description"],
-          image: event.data["image"],
-          price: event.data["price"].to_f.round(2),
-          product_id: event.data["product_id"]
+          item_id: event.payload[:item_id],
+          cart_id: event.payload[:cart_id],
+          description: event.payload[:description],
+          image: event.payload[:image],
+          price: event.payload[:price].to_f.round(2),
+          product_id: event.payload[:product_id]
         )
         self.data << cart_item
-        self.total_price += event.data["price"].to_f
+        self.total_price += event.payload[:price].to_f
       when "ItemRemoved"
-        self.data.delete_if { |item| item.item_id == event.data["item_id"] }
+        if idx = self.data.find_index { |item| item.item_id == event.payload[:item_id] }
+          self.data.delete_at(idx)
+        end
+        self.total_price = self.data.sum {|item| item.price }
+      when "ItemArchived"
+        if idx = self.data.find_index { |item| item.item_id == event.payload[:item_id] }
+          self.data.delete_at(idx)
+        end
         self.total_price = self.data.sum {|item| item.price }
       when "CartCleared"
         self.data = []
@@ -76,15 +83,13 @@ class CartItems < Sinatra::Base
   end
 
   get '/:cart_id/items' do
-    query = Kroniko::Query.new([
-      Kroniko::QueryItem.new(
-        types: %w[CartCreated ItemAdded ItemRemoved CartCleared], 
-        properties: {"cart_id" => params[:cart_id]}
-      )
-    ])
-  
-    events = settings.event_store.read(query: query)
-    cart_items = CartItemsReadModel.new.apply_event(events)
+    filter = EventStoreRuby.create_filter(
+      ['CartCreated', 'ItemAdded', 'ItemRemoved', 'CartCleared', 'ItemArchived'], 
+      [{cart_id: params[:cart_id]}]
+    )
+    query_result = settings.event_store.query(filter)
+ 
+    cart_items = CartItemsReadModel.new.apply_event(query_result.events )
     JSON.pretty_generate(cart_items.to_hash)
   end
 end

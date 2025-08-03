@@ -1,6 +1,35 @@
 require 'sinatra/base'
-require_relative '../events/item_added'
-require_relative '../events/cart_created'
+require 'eventstore_ruby'
+
+class CartCreatedEvent < EventStoreRuby::Event
+  def initialize(cart_id:)
+    payload = {
+      cart_id: cart_id
+    }
+    super(event_type: 'CartCreated', payload: payload)
+  end
+end
+
+class ItemAddedEvent < EventStoreRuby::Event
+  def initialize(cart_id:, item_id:, description:, image:, product_id:, price:)
+    payload = {
+      cart_id: cart_id,
+      item_id: item_id,
+      description: description,
+      image: image,
+      product_id: product_id,
+      price: price
+    }
+    super(event_type: 'ItemAdded', payload: payload)
+  end
+
+  def cart_id; payload[:cart_id]; end
+  def item_id; payload[:item_id]; end
+  def description; payload[:description]; end
+  def image; payload[:image]; end
+  def product_id; payload[:product_id]; end
+  def price; payload[:price]; end
+end
 
 AddItemCommand = Data.define(
   :cart_id,
@@ -23,20 +52,16 @@ module AddItemCommandHandler
     end
     
     [
-      CartCreated.new(
-        data: {
-          cart_id: command.cart_id,
-        }
+      CartCreatedEvent.new(
+        cart_id: command.cart_id,
       ),
-      ItemAdded.new(
-        data: {
+      ItemAddedEvent.new(
           cart_id: command.cart_id,
           item_id: command.item_id,
           product_id: command.product_id,
           description: command.description,
           image: command.image,
           price: command.price
-        }
       )
     ]
   end
@@ -45,7 +70,7 @@ module AddItemCommandHandler
 
   def self.build_state(events)
     events.reduce(State.new(item_count: 0)) do |state, event|
-      case event.type
+      case event.event_type
       when "ItemAdded" then State.new(item_count: state.item_count + 1)
       when "ItemRemoved" then State.new(item_count: state.item_count - 1)
       when "CartCleared" then State.new(item_count: 0)
@@ -64,13 +89,12 @@ class AddItem < Sinatra::Base
   post '/add_item' do
       data = JSON.parse request.body.read
 
-      query = Kroniko::Query.new([
-        Kroniko::QueryItem.new(
-          types: %w[ItemAdded ItemRemoved CartCleared], 
-          properties: {"cart_id" => data["cart_id"]
-        })
-      ])
-      events = settings.event_store.read(query: query)
+      filter = EventStoreRuby.create_filter(
+        ['ItemAdded', 'ItemRemoved', 'CartCleared'], 
+        [{cart_id: data["cart_id"]}]
+      )
+      query_result = settings.event_store.query(filter)
+      events = query_result.events
 
       command = AddItemCommand.new(
         cart_id: data["cart_id"],
@@ -82,21 +106,14 @@ class AddItem < Sinatra::Base
       )
       new_events = AddItemCommandHandler.call(events, command)
 
-      stored = settings.event_store.write(
-        events: new_events, 
-        condition: Kroniko::AppendCondition.new(
-          fail_if_events_match: Kroniko::Query.new([
-            Kroniko::QueryItem.new(
-              types: ["ItemAdded"],
-              properties: { "cart_id" => data["cart_id"] }
-            )
-          ]),
-          after: events.last&.position
-        )
+      settings.event_store.append(
+        new_events, 
+        filter,
+        expected_max_sequence_number: query_result.max_sequence_number
       )
 
       status 200
-      stored.to_json
+      {cart_id: command.cart_id}.to_json
   rescue AddItemCommandHandler::TooManyItemsInCart
     status 400
     { error: "Cart cannot have more than 3 items" }.to_json

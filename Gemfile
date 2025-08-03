@@ -7,9 +7,12 @@ gem 'json'
 
 gem 'debug'
 
-gem 'kroniko', git: 'https://github.com/ortegacmanuel/kroniko.git'
+gem 'pg', '>= 1.4'
+gem 'eventstore_ruby', git: 'https://github.com/gazpachoteam/eventstore-ruby.git', branch: 'main'
 
 gem 'rackup'
 gem 'puma'
 
 gem "minitest"
+
+gem 'sequel', '>= 5.79'
