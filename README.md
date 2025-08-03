@@ -1,13 +1,10 @@
-## CartProducts read model
 
-Rebuild projection:
-```bash
-bundle exec rake projections:rebuild_cart_products
-```
+# 🧑‍💻 understanding-eventsourcing-ruby
 
-Query via HTTP (assuming `CartsWithProducts::API` mounted):
-```bash
-curl http://localhost:9292/carts/<cart_id>/products
+An implementation of the Event Model from the book Understanding Eventsourcing from Martin Dilger with Ruby ([Sinatra](https://sinatrarb.com/) + [EventStoreRuby](https://github.com/gazpachoteam/eventstore-ruby))
+
+See the book here: https://leanpub.com/eventmodeling-and-eventsourcing
+The repository with the implementation example: https://github.com/dilgerma/eventsourcing-book
 ```
 
 # 🧩 Slice Architecture
@@ -103,3 +100,14 @@ This keeps slices decoupled while remaining explicit and testable.
 4. Run the app – it loads automatically.
 
 Happy slicing! 🎉 
+
+## CartProducts read model
+
+Rebuild projection:
+```bash
+bundle exec rake projections:rebuild_cart_products
+```
+
+Query via HTTP (assuming `CartsWithProducts::API` mounted):
+```bash
+curl http://localhost:9292/carts/<cart_id>/products
