@@ -5,7 +5,6 @@ An implementation of the Event Model from the book Understanding Eventsourcing f
 
 See the book here: https://leanpub.com/eventmodeling-and-eventsourcing
 The repository with the implementation example: https://github.com/dilgerma/eventsourcing-book
-```
 
 # 🧩 Slice Architecture
 
