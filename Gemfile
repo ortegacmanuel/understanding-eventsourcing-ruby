@@ -8,7 +8,7 @@ gem 'json'
 gem 'debug'
 
 gem 'pg', '>= 1.4'
-gem 'eventstore_ruby', path: '/home/manuel/kodo/eventstore-ruby'
+gem 'eventstore_ruby', git: 'https://github.com/gazpachoteam/eventstore-ruby.git', branch: 'main'
 
 gem 'rackup'
 gem 'puma'

@@ -1,5 +1,7 @@
-PATH
-  remote: /home/manuel/kodo/eventstore-ruby
+GIT
+  remote: https://github.com/gazpachoteam/eventstore-ruby.git
+  revision: d75c85b047fe0dce918ecb82dcef1c0bcbcbc5e3
+  branch: main
   specs:
     eventstore_ruby (0.1.0)
       concurrent-ruby (~> 1.2)
