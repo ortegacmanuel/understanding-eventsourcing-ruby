@@ -1,3 +1,4 @@
 # Event Store
 /event_store/
 /event_store/*
+.env

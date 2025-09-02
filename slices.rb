@@ -8,7 +8,7 @@ module Slices
   # All modules that extended Slice during the requires above
   ALL_SLICES = Slice.registry.freeze
 
-  BOOT_ORDER = [] unless const_defined?(:BOOT_ORDER)
+  BOOT_ORDER = [CartsWithProducts] unless const_defined?(:BOOT_ORDER)
 
   def boot_all(event_store:, app:, conn_str:, **extra)
     ordered = BOOT_ORDER + (ALL_SLICES - BOOT_ORDER)
